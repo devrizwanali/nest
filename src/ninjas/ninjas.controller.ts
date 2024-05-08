@@ -2,6 +2,7 @@ import { Controller, Get, Post, Put, Delete, Param, Query, Body } from '@nestjs/
 import { CreateNinjaDto } from './dto/create-ninja.dto';
 import { UpdateNinjaDto } from './dto/update-ninja.dto';
 import { NinjasService } from './ninjas.service';
+import { NotFoundException, ParseIntPipe, ValidationPipe } from '@nestjs/common';
 
 @Controller('ninjas')
 export class NinjasController {
@@ -13,12 +14,16 @@ export class NinjasController {
   }
   // GET /ninjas/:id
   @Get(':id')
-  getOneNinja(@Param('id') id: string) {
-    return this.ninjasService.getNinja(+id);
+  getOneNinja(@Param('id', ParseIntPipe) id: number) {
+    try {
+      return this.ninjasService.getNinja(id);
+    } catch(err) {
+      throw new NotFoundException();
+    }
   }
   // POST -> /ninjas
   @Post()
-  createNinja(@Body() createNinjaDto: CreateNinjaDto) {
+  createNinja(@Body(new ValidationPipe()) createNinjaDto: CreateNinjaDto) {
     return this.ninjasService.createNinja(createNinjaDto);
   }
   // PUT /ninjas/:id
